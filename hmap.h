@@ -1,21 +1,5 @@
 #include <stdbool.h>
-/*typedef struct {
-    *char key;
-    *char value;
-} Value;
-
-typedef bucket {
-    Value[] values;
-}
-
-
-typedef struct {
-    int size;
-    char[][][] map;
-} Hashmap */
-
-typedef struct {
-} Hashmap;
+typedef struct Hashmap Hashmap;
 
 Hashmap *hm_new();
 Hashmap *hm_new_size(int);

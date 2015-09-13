@@ -58,7 +58,7 @@ void double_hm_test(void **state) {
     assert_true(res2 != NULL);
 
     assert_string_equal(res1, "test2");
-    assert_string_equal(res1, "yet_another_test");
+    assert_string_equal(res2, "yet_another_test");
 }
 
 void multi_insert_test(void **state) {
