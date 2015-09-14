@@ -2,6 +2,7 @@
 #include <string.h>
 #include "hmap.h"
 
+#define HM_DEFAULT_BUCKET_COUNT 16
 
 struct Value {
     char *key;
@@ -9,15 +10,10 @@ struct Value {
     struct Value *next;
 };
 
-
 struct Hashmap {
     int size;
     struct Value **values;
 };
-
-
-
-#define HM_DEFAULT_BUCKET_COUNT 16
 
 static int hash(char *key, int size) {
     int count = 0;
@@ -32,12 +28,13 @@ static struct Value **find_value(Hashmap *h, char *key) {
     struct Value **ptr = &(h->values[bucket]);
     while ((*ptr) != NULL) {
         if (strcmp(key, (*ptr)->key) == 0) {
-            return ptr;
+            break;
         }
         ptr = &((*ptr)->next);
     }
     return ptr;
 }
+
 Hashmap *hm_new_size(int size) {
     struct Value **values = malloc(sizeof(struct Value *) * size);
     memset(values, 0, sizeof(struct Value *) * size);
@@ -68,6 +65,7 @@ bool hm_insert(Hashmap *h, char *key, char *value) {
     struct Value **ptr = find_value(h, key);
     if ((*ptr) == NULL) {
         struct Value *newval = malloc(sizeof(struct Value));
+        // duplicate key and value so users don't modify them
         newval->key = strdup(key);
         newval->value = strdup(value);
         *ptr = newval;
@@ -85,6 +83,8 @@ bool hm_delete(Hashmap *h, char *key) {
     } else {
         temp = (*ptr);
         (*ptr) = (*ptr) -> next;
+        free(temp->key);
+        free(temp->value);
         free(temp);
         return true;
     }
