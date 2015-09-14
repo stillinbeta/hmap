@@ -27,6 +27,17 @@ static int hash(char *key, int size) {
     return count % size;
 }
 
+static struct Value **find_value(Hashmap *h, char *key) {
+    int bucket = hash(key, h->size);
+    struct Value **ptr = &(h->values[bucket]);
+    while ((*ptr) != NULL) {
+        if (strcmp(key, (*ptr)->key) == 0) {
+            return ptr;
+        }
+        ptr = &((*ptr)->next);
+    }
+    return ptr;
+}
 Hashmap *hm_new_size(int size) {
     struct Value **values = malloc(sizeof(struct Value *) * size);
     memset(values, 0, sizeof(struct Value *) * size);
@@ -43,33 +54,38 @@ Hashmap *hm_new() {
 bool hm_has_key(Hashmap * h, char * key) {
     return (hm_get(h, key) != NULL);
 }
+
 char *hm_get(Hashmap *h, char *key) {
-    int bucket = hash(key, h->size);
-    struct Value **ptr = &(h->values[bucket]);
-    while ((*ptr) != NULL) {
-        if (strcmp(key, (*ptr)->key) == 0) {
-            return (*ptr)->value;
-        }
-        ptr = &((*ptr)->next);
+    struct Value **ptr = find_value(h, key);
+    if ((*ptr) == NULL) {
+        return NULL;
+    } else {
+        return (*ptr)->value;
     }
-    return NULL;
 }
+
 bool hm_insert(Hashmap *h, char *key, char *value) {
-    int bucket = hash(key, h->size);
-    struct Value **ptr = &(h->values[bucket]);
-    while ((*ptr) != NULL) {
-        if (strcmp(key, (*ptr)->key) == 0) {
-            return false;
-        }
-        ptr = &((*ptr)->next);
+    struct Value **ptr = find_value(h, key);
+    if ((*ptr) == NULL) {
+        struct Value *newval = malloc(sizeof(struct Value));
+        newval->key = strdup(key);
+        newval->value = strdup(value);
+        *ptr = newval;
+        return true;
+    } else {
+        return false;
     }
-    struct Value *newval = malloc(sizeof(struct Value));
-    newval->key = strdup(key);
-    newval->value = strdup(value);
-    *ptr = newval;
-    return true;
 }
 
 bool hm_delete(Hashmap *h, char *key) {
-    return false;
+    struct Value *temp;
+    struct Value **ptr = find_value(h, key);
+    if ((*ptr) == NULL) {
+        return false;
+    } else {
+        temp = (*ptr);
+        (*ptr) = (*ptr) -> next;
+        free(temp);
+        return true;
+    }
 }
